@@ -1,0 +1,64 @@
+﻿@page "/users"
+@using SmartWorkout.DataAccess
+@using SmartWorkout.DataAccess.Entities
+@using SmartWorkout.DataAccess.Repositories
+@attribute [StreamRendering]
+
+<PageTitle>Users</PageTitle>
+
+<h1 class="mt-4">Users</h1>
+
+<p class="mt-4">This is a list of all the users</p>
+
+@if (users == null)
+{
+    <p><em>Loading...</em></p>
+}
+else
+{
+    <table class="table table-striped table-bordered">
+        <thead class="thead-dark">
+            <tr>
+                <th>Id</th>
+                <th>Name</th>
+                <th>Surname</th>
+                <th>Email</th>
+                <th>Phone</th>
+                <th>Weight</th>
+                <th>Age</th>
+                <th>Gender</th>
+            </tr>
+        </thead>
+        <tbody>
+            @foreach (var u in users)
+            {
+                <tr>
+                    <td>@u.Id</td>
+                    <td>@u.Name</td>
+                    <td>@u.Surname</td>
+                    <td>@(u.Email ?? "No email")</td>
+                    <td>@(u.Phone ?? "No phone number provided")</td>
+                    <td>@(!string.IsNullOrEmpty(u.Weight.ToString()) ? u.Weight : "unknown")</td>
+                    <td>@(!string.IsNullOrEmpty(u.Age.ToString()) ? u.Age : "unknown")</td>
+                    <td>@u.Gender.Name</td>
+                </tr>
+            }
+        </tbody>
+    </table>
+}
+
+@code {
+    private IGenericRepo<User> repo = new UserRepo(new SmartWorkoutContext());
+    private User[]? users;
+
+    protected override async Task OnInitializedAsync()
+    {
+
+        // Simulate asynchronous loading to demonstrate streaming rendering
+        await Task.Delay(500);
+        ICollection<User> col = await repo.GetAllAsync();
+        users = col.ToArray();
+
+    }
+
+}

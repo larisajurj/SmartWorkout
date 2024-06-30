@@ -1,0 +1,83 @@
+﻿@page "/exercises"
+@using SmartWorkout.DataAccess
+@using SmartWorkout.DataAccess.Entities
+@using SmartWorkout.DataAccess.Repositories
+@using Syncfusion.Blazor
+
+@attribute [StreamRendering]
+
+<PageTitle>Exercises</PageTitle>
+
+<h1 class="mt-4">Exercises</h1>
+
+@if (trainers != null)
+{
+   
+    //make me a drop down menu with trainers.Name and save the selected trainer.id
+    <select @onchange="OnTrainerChanged">
+        @foreach (var trainer in trainers)
+        {
+            <option value="@trainer.Id">@trainer.Name @trainer.Surname</option>
+        }
+    </select>
+
+}
+
+
+<p class="mb-4">This is a list of all the exercises</p>
+
+@if (exercises == null)
+{
+    <p><em>Loading...</em></p>
+}
+else
+{
+    <table class="table table-striped table-bordered">
+        <thead class="thead-dark">
+            <tr>
+                <th scope="col">Id</th>
+                <th scope="col">Name</th>
+                <th scope="col">Type</th>
+            </tr>
+        </thead>
+        <tbody>
+            @foreach (var u in exercises)
+            {
+                <tr>
+                    <td>@u.Id</td>
+                    <td>@u.Name</td>
+                    <td>@u.TypeId</td>
+                </tr>
+            }
+        </tbody>
+    </table>
+}
+
+@code {
+    private string selectedTrainerId;
+    public string[] SelectedCars { get; set; } = new string[] { };
+
+
+    private IGenericRepo<Exercise> repo = new ExerciseRepo(new SmartWorkoutContext());
+    private IGenericRepo<Trainer> trainerRepo = new TrainerRepo(new SmartWorkoutContext());
+    private Exercise[]? exercises;
+    private Trainer[]? trainers;
+
+    protected override async Task OnInitializedAsync()
+    {
+
+        await Task.Delay(500); 
+        ICollection<Trainer> colTrainers = await trainerRepo.GetAllAsync();
+        trainers = colTrainers.ToArray();
+        ICollection<Exercise> col = await repo.GetAllAsync();
+        exercises = col.ToArray();
+
+    }
+    protected async Task OnTrainerChanged(ChangeEventArgs e)
+    {
+        selectedTrainerId = e?.Value?.ToString();
+        Console.WriteLine(selectedTrainerId);
+        await Task.Delay(1);
+    }
+
+}

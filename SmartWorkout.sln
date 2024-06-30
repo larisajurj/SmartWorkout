@@ -5,7 +5,7 @@ VisualStudioVersion = 17.9.34723.18
 MinimumVisualStudioVersion = 10.0.40219.1
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "SmartWorkout", "SmartWorkout.csproj", "{00266FAF-5C01-4A83-B0F2-4E7CB9DC3834}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "SmartWorkout.DataAccess", "..\SmartWorkout.DataAccess\SmartWorkout.DataAccess.csproj", "{DE07F137-B6CB-4BAE-A02A-2719F8558366}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "SmartWorkout.DataAccess", "..\SmartWorkout.DataAccess\SmartWorkout.DataAccess.csproj", "{DE07F137-B6CB-4BAE-A02A-2719F8558366}"
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
