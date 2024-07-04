@@ -1,0 +1,111 @@
+﻿@page "/edit/{Id:int}"
+@using SmartWorkout.DataAccess
+@using SmartWorkout.DataAccess.Entities
+@using SmartWorkout.DataAccess.Repositories
+@inject NavigationManager Navigation
+@rendermode InteractiveServer
+@inject IGenericRepo<User> userRepo
+
+@if(Model is not null){
+    <div class="add-user-container">
+        <div class="form-container">
+            <div class="decorative-img">
+                <img class="image" src="./workout.png" />
+            </div>
+            <div class="form">
+                <EditForm method="post" Model="Model" OnSubmit="FormSubmitted" FormName="EditUser">
+                    <div class="title">Edit user @Id</div>
+                    <input type="hidden" name="Model.Id" />
+                    @if (Submitted)
+                    {
+                        <div class="subtitle">
+                            <label> Sucessfully inserted client</label>
+                            <label> @(Model?.Surname ?? "No data")</label>
+                            <label> @Model?.Name</label>
+                        </div>
+                    }
+                    else
+                    {
+                        <label class="subtitle"> Enter your values</label>
+
+                    }
+
+                    <div class="input-container ic1">
+                        <label class="input-label" for="Surname">Surname</label>
+                        <InputText id="Surname" @bind-Value="Model.Surname" class="input" ></InputText>
+
+                    </div>
+                    <div class="input-container ic2">
+                        <label class="input-label">Name</label>
+                        <InputText id="Name" @bind-Value="Model.Name"></InputText>
+                    </div>
+
+                    <div class="input-container ic2">
+                        <label class="input-label">Email</label>
+                        <InputText id="Email" @bind-Value="Model.Email"></InputText>
+                    </div>
+
+                    <div class="input-container ic2">
+                        <label class="input-label">Phone</label>
+                        <InputText id="Phone" @bind-Value="Model.Phone"></InputText>
+                    </div>
+
+                    <div class="input-container ic2">
+                        <label class="input-label">Weight</label>
+                        <InputNumber id="Weight" @bind-Value="Model.Weight"></InputNumber>
+                    </div>
+
+                    <div class="input-container ic2">
+                        <label class="input-label">Age</label>
+                        <InputNumber id="Age" @bind-Value="Model.Age"></InputNumber>
+                    </div>
+
+                    <div class="input-container ic2">
+                        <label class="input-label">Select gender</label>
+                        <InputSelect @bind-Value="Model.GenderId">
+                            <option value="">
+                                Select your gender ...
+                            </option>
+                            <option value=1>
+                                Female
+                            </option>
+                            <option value=2>
+                                Male
+                            </option>
+                            <option value=3>
+                                Other
+                            </option>
+                        </InputSelect>
+                    </div>
+
+                    <input type="submit" value="Submit" class="submit" />
+                </EditForm>
+            </div>
+        </div>
+    </div>
+}
+
+@code {
+    [Parameter]
+    public int Id { get; set; }
+    [SupplyParameterFromForm]
+    protected User? Model { get; set; }
+    public bool Submitted = false;
+
+    protected override async Task OnInitializedAsync()
+    {
+        Model ??= await userRepo.GetByIdAsync(Id);
+    }
+
+    private async Task FormSubmitted()
+    {
+        if(Model is not null)
+        {
+            await userRepo.UpdateAsync(Model);
+            Submitted = true;
+            Navigation.NavigateTo("/users");
+        }
+        
+
+    }
+}

@@ -1,0 +1,105 @@
+﻿@page "/register"
+@using SmartWorkout.DataAccess
+@using SmartWorkout.DataAccess.Entities
+@using SmartWorkout.DataAccess.Repositories
+@rendermode InteractiveServer
+@inject IGenericRepo<User> userRepo
+@inject IGenericRepo<Trainer> trainerRepo
+
+<div class="add-user-container">
+    <div class="form-container">
+        <div class="decorative-img">
+            <img class="image" src="./workout.png" />
+        </div>
+        <div class="form">
+            <div class="title">Regiter to a trainer</div>
+            <div class="input-container ic2">
+                @if (users != null)
+                {
+                    <label class="input-label">Select which user you are</label>
+                    //make me a drop down menu with trainers.Name and save the selected trainer.id
+                    <select @onchange="@((e) => OnUserChanged(e))" class="form-select">
+                        <option disabled selected="selected">
+                            Select a user ...
+                        </option>
+                        @foreach (var u in users)
+                        {
+                            <option value="@u.Id">@u.Name @u.Surname</option>
+                        }
+                    </select>
+                }
+                else
+                {
+                    <label> No users </label>
+                }
+            </div>
+            <div class="input-container ic1">
+                @if (trainers != null)
+                {
+                    <label class="input-label">Select a trainer</label>
+
+
+                    //make me a drop down menu with trainers.Name and save the selected trainer.id
+                    <select class="form-select" @onchange="@((e) => OnTrainerChanged(e))">
+                        <option disabled selected="selected">
+                            Select a trainer ...
+                        </option>
+                        @foreach (var trainer in trainers)
+                        {
+                            <option value="@trainer.Id">@trainer.Name @trainer.Surname</option>
+                        }
+                    </select>
+                }
+            </div>
+
+            <button @onclick="FormSubmitted" class="btn submit" >Register</button>
+            @if(Submitted == true)
+            {
+                <p> Sucessfully registered
+                </p>
+            }
+
+        </div>
+    </div>
+</div>
+
+@code {
+    private int selectedTrainerId;
+    private Trainer[]? trainers;
+    private List<User> users;
+    private int selectedUserId;
+
+    public bool Submitted = false;
+
+    protected override async Task OnInitializedAsync()
+    {
+        await Task.Delay(500);
+        ICollection<User> col = await userRepo.GetAllAsync();
+        users = col.ToList();
+        ICollection<Trainer> colTrainers = await trainerRepo.GetAllAsync();
+        trainers = colTrainers.ToArray();
+    }
+
+    private async Task FormSubmitted()
+    {
+        Trainer t = await trainerRepo.GetByIdAsync(selectedTrainerId);
+        User u = await userRepo.GetByIdAsync(selectedUserId);
+        t.Users.Add(u);
+        trainerRepo.UpdateAsync(t);
+        Submitted = true;
+
+    }
+    protected async Task OnTrainerChanged(ChangeEventArgs e)
+    {
+        selectedTrainerId = Int32.Parse(e.Value.ToString());
+        Console.WriteLine(selectedTrainerId);
+        await Task.Delay(1);
+    }
+
+    protected async Task OnUserChanged(ChangeEventArgs e)
+    {
+        selectedUserId = Int32.Parse(e.Value.ToString());
+        Console.WriteLine(selectedUserId);
+        await Task.Delay(1);
+    }
+}
