@@ -1,19 +1,38 @@
-﻿@page "/counter"
-@rendermode InteractiveServer
+﻿@page "/starship-11"
+@using System.ComponentModel.DataAnnotations
 
-<PageTitle>Counter</PageTitle>
+<EditForm Model="Model" OnValidSubmit="Submit" FormName="Starship11">
+    <DataAnnotationsValidator />
+    <ValidationSummary />
+    <div>
+        <label>
+            Identifier: 
+            <InputText @bind-Value="Model!.Id" />
+        </label>
+    </div>
+    <div>
+        <button type="submit">Submit</button>
+    </div>
+</EditForm>
 
-<h1>Counter</h1>
-
-<p role="status">Current count: @currentCount</p>
-
-<button class="btn btn-primary" @onclick="IncrementCount">Click me</button>
+<div>
+    CurrentValue: @Model?.Id
+</div>
 
 @code {
-    private int currentCount = 0;
+    [SupplyParameterFromForm]
+    public Starship? Model { get; set; }
 
-    private void IncrementCount()
+    protected override void OnInitialized() => Model ??= new();
+
+    private void Submit()
     {
-        currentCount++;
+    }
+
+    public class Starship
+    {
+        [Required]
+        [StringLength(10, ErrorMessage = "Id is too long.")]
+        public string? Id { get; set; }
     }
 }

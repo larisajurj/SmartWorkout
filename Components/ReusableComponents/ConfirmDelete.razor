@@ -1,0 +1,26 @@
+﻿
+@if (isVisible)
+{
+    <div class="delete-dialog">
+        <i class="bi bi-exclamation-circle" style="color: red; font-size: 1000%; background-color: #c4d3e3;"></i>
+        <h1 style="background-color: #c4d3e3"> Are you sure? </h1>
+        <h3 style="background-color: #c4d3e3"> After deletion, the data can't be restored'</h3>
+        <div class="buttons-div " style="background-color: #c4d3e3">
+            <button class="btn btn-primary" id="cancel-button" @onclick="() => isVisible= !isVisible"> Cancel</button>
+            <button class="btn btn-primary" id="confirm-button" @onclick="InvokeDeleteMethod"> Confirm</button>
+        </div>
+    </div>
+}
+@code {
+
+    [Parameter] public Func<Task> DeleteMethod { get; set; }
+    [Parameter] public bool isVisible { get; set; }
+
+    private async Task InvokeDeleteMethod()
+    {
+        isVisible = false;
+        await DeleteMethod?.Invoke();
+    }
+
+
+}

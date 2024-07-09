@@ -1,0 +1,186 @@
+﻿@page "/editWorkout/{Id:int}"
+@using SmartWorkout.Components.ReusableComponents
+@using SmartWorkout.DataAccess.Entities
+@using SmartWorkout.DataAccess.Repositories
+@rendermode InteractiveServer
+@inject IGenericRepo<Workout> repo
+@inject IGenericRepo<Exercise> exerciseRepo
+
+@if(workout != null){
+
+	<div class="main-container">
+		<div class="details" style="width: 20%; float:left">
+		<tr class="box">
+			<div class="card">
+				<h5 class="card-header">Workout details</h5>
+				@foreach (var log in exerciseLogs)
+				{
+					<div class="card-body">
+						<h5 class="card-title">@(log?.Exercise.Name ?? "test")
+							<button class="btn"  @onclick="@(() => handleEditPress(log))">Edit</button>
+						</h5>
+						<ul class="list-group list-group-flush">
+							<li class="list-group-item">Type: @log.Exercise.Type.Name</li>
+							@if (log.Weight != null)
+							{
+								<li class="list-group-item">
+									Weight: @log.Weight
+								</li>
+							}
+							@if (log.Sets != null)
+							{
+								<li class="list-group-item">Sets: @log.Sets</li>
+							}
+							@if (log.Reps != null)
+							{
+								<li class="list-group-item">Reps: @log.Reps</li>
+							}
+							@if (@log.Distance != null)
+							{
+								<li class="list-group-item">Sets: Distance: @log.Distance</li>
+							}
+							@if (@log.Duration != null)
+							{
+								<li class="list-group-item">Sets: Duration: @log.Duration</li>
+							}
+						</ul>
+
+					</div>
+				}
+			</div>
+	
+		</tr>
+
+		</div style="width: 20%; float:right>
+				<div class="add-exercise-log">
+			<h2> Add an exercise to the workout</h2>
+				<EditForm Model="Model" OnValidSubmit="Submit" FormName="Starship11" class="add-exercise-log">
+						<InputSelect @bind-Value="Model.ExerciseId">
+								<option disabled selected="selected">
+									Select an exercise ...
+								</option>
+								@foreach (var exercise in exercises)
+								{
+									<option value="@exercise.Id">@exercise.Name</option>
+								}
+						</InputSelect>
+					
+					<label> Weight
+						<InputNumber @bind-Value="Model!.Weight">Weight: </InputNumber>
+					</label>
+
+					<label>
+						Sets:
+						<InputNumber @bind-Value="Model!.Sets">Sets: </InputNumber>
+					</label>
+			
+					<label>
+						Reps:
+						<InputNumber @bind-Value="Model!.Reps"> </InputNumber>
+					</label>
+			
+					<label>
+						Distance:
+						<InputNumber @bind-Value="Model!.Distance"> </InputNumber>
+					</label>
+			
+					<label>
+						Duration: 
+						<InputNumber @bind-Value="Model.Duration"></InputNumber>
+					</label>
+					@if (editMode)
+					{
+						<button @onclick="Cancel">Cancel</button>
+					}
+
+					<button type="submit">Submit</button>
+
+					
+
+			</EditForm>
+		
+		</div>
+	</div>
+}
+
+@code {
+	[Parameter]
+	public int Id{ get; set; }
+	public Workout? workout;
+
+	[SupplyParameterFromForm]
+	public ExerciseLog? Model{ get; set; }
+
+	public List<ExerciseLog> exerciseLogs;
+	public bool editMode;
+	public List<Exercise> exercises;
+
+	protected override async Task OnInitializedAsync()
+	{
+		Model = new(){WorkoutId = Id};
+		workout = await repo.GetByIdAsync(Id);
+		exerciseLogs = new List<ExerciseLog>(workout.ExerciseLogs);
+		ICollection<Exercise> col = await exerciseRepo.GetAllAsync();
+		List<Exercise> exercisesList = new List<Exercise>(col);
+
+		foreach(var log in exerciseLogs)
+		{
+			
+		} 
+
+	}
+	private async Task Submit()
+	{
+		try
+		{
+			if (editMode)
+			{
+				var exerciseLogEdited = exerciseLogs.Where(x => x.ExerciseId == Model.ExerciseId).FirstOrDefault();
+				workout.ExerciseLogs.Remove(exerciseLogEdited);
+			}
+			
+			var modelCopy = makeCopy(Model);
+			workout.ExerciseLogs.Add(modelCopy);
+			await repo.UpdateAsync(workout);
+			exerciseLogs = workout.ExerciseLogs.ToList();
+			if (editMode)
+			{
+				editMode = !editMode;
+			}
+					Model = new(){WorkoutId = Id};
+
+			Console.WriteLine("Added");
+		}catch(Exception e)
+		{
+			Console.WriteLine(e);
+		}
+	}
+
+	private void handleEditPress(ExerciseLog e)
+	{
+		editMode = true;
+		Model = e;
+
+	}
+	private void Cancel(MouseEventArgs e)
+	{
+
+		Model = new ExerciseLog(){WorkoutId = workout.Id};
+		editMode = false;
+	}
+	private static ExerciseLog makeCopy(ExerciseLog model)
+	{
+		return new ExerciseLog()
+					{
+					WorkoutId = model.WorkoutId,
+					ExerciseId = model.ExerciseId,
+					Weight = model.Weight,
+					Sets = model.Sets,
+					Reps = model.Reps,
+					Distance = model.Distance,
+					Duration = model.Duration,
+					Exercise = model.Exercise
+			};
+	}
+
+}

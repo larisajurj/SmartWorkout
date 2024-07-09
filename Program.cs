@@ -9,9 +9,12 @@ var builder = WebApplication.CreateBuilder(args);
 builder.Services.AddRazorComponents()
     .AddInteractiveServerComponents();
 
+
 builder.Services.AddScoped<IGenericRepo<User>, UserRepo>();
 builder.Services.AddScoped<IGenericRepo<Exercise>, ExerciseRepo>();
 builder.Services.AddScoped<IGenericRepo<Trainer>, TrainerRepo>();
+builder.Services.AddScoped<IGenericRepo<Workout>, WorkoutRepo>();
+
 builder.Services.AddDbContext<SmartWorkoutContext>();
 
 

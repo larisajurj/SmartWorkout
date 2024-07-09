@@ -2,10 +2,10 @@ html, body {
     font-family: 'Helvetica Neue', Helvetica, Arial, sans-serif;
 }
 
-a, .btn-link {
-    color: #25405b;
+a{
+    color: white;
+    text-decoration: none;
 }
-
 .btn-primary {
     color: #fff;
     background-color: #25405b;

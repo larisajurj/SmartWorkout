@@ -1,0 +1,114 @@
+﻿@using SmartWorkout.Components.ReusableComponents
+@using SmartWorkout.DataAccess.Entities
+@using SmartWorkout.DataAccess.Repositories
+@rendermode InteractiveServer
+@inject IGenericRepo<Workout> repo
+@if(workout != null)
+{
+	<tr>
+		<td>@workout.Id</td>
+		<td>@workout.Duration</td>
+		<td>@workout.Date</td>
+		<td>
+			<button class="btn btn-primary" @onclick="HandleSeeMore">See details</button>
+		</td>
+		<td>
+			@if (Visible)
+			{
+				<div class="card">
+					<h5 class="card-header">Workout details</h5>
+				@foreach(var log in workout.ExerciseLogs)
+				{
+						<div class="card-body">
+							<h5 class="card-title">@log.Exercise.Name</h5>
+							<ul class="list-group list-group-flush">
+								<li class="list-group-item">Type: @log.Exercise.Type.Name</li>
+								@if(log.Weight != null)
+								{
+									<li class="list-group-item">Weight: @log.Weight
+									</li>
+								}
+								@if(log.Sets != null)
+								{
+									<li class="list-group-item">Sets: @log.Sets</li>
+								}
+								@if(log.Reps != null)
+								{
+									<li class="list-group-item">Sets: Reps: @log.Reps</li>
+								}
+								@if (@log.Distance != null)
+								{
+									<li class="list-group-item">Sets: Distance: @log.Distance</li>
+								}
+								@if(@log.Duration != null)
+								{
+									<li class="list-group-item">Sets: Duration: @log.Duration</li>
+								}
+							</ul>
+						</div>
+				}
+				</div>
+			}
+			else
+			{
+			<td>
+				<button class="btn btn-primary">
+
+					<a href="@($"/editWorkout/{workout.Id}")">Edit<i class="bi bi-pen"></i></a>
+				</button>
+			</td>
+			<td>
+				<button class="btn btn-danger" @onclick="(()=>showDeleteDialog = true)">
+					Delete 
+					<i class="bi bi-trash"></i>
+				</button>
+			</td>
+			
+			}
+
+		</td>
+		
+		
+	</tr>
+}
+else
+{
+	<label> no details</label>
+}
+
+<ConfirmDelete isVisible="showDeleteDialog" DeleteMethod="deleteWorkout"></ConfirmDelete>
+
+@code {
+
+	[Parameter]
+	public bool Visible{ get; set; }
+	[Parameter]
+	public Action<Workout> removeFromList { get; set; }
+	[Parameter]
+	public Workout? workout { get; set; }
+	public bool showDeleteDialog;
+
+	protected override async Task OnInitializedAsync()
+	{
+		Visible = false;
+
+	}
+
+	private async Task deleteWorkout()
+	{
+		try
+		{
+			Console.WriteLine("I am deleting");
+			await repo.DeleteAsync(workout.Id);
+			removeFromList.Invoke(workout);
+		}catch(Exception e)
+		{
+			Console.WriteLine("Could not add" + e);
+		}
+	}
+	private async Task HandleSeeMore(MouseEventArgs e)
+	{
+		Visible = !Visible;
+
+	}
+}

@@ -1,0 +1,151 @@
+﻿@page "/workout/{Id:int}"
+@using SmartWorkout.DataAccess
+@using SmartWorkout.DataAccess.Entities
+@using SmartWorkout.DataAccess.Repositories
+@using System.ComponentModel.DataAnnotations
+@rendermode InteractiveServer
+@attribute [StreamRendering]
+@inject NavigationManager Navigation
+
+@inject IGenericRepo<User> userRepo
+@inject IGenericRepo<Workout> workoutRepo
+
+
+<head>
+    <link rel="stylesheet" href="./app.css" />
+
+</head>
+<PageTitle>Workouts</PageTitle>
+
+<h1 class="mt-4">Workouts for user: 
+    @if(user is not null)
+    {
+        <label>
+            @user.Name @user.Surname
+        </label>
+
+    }
+    else
+    {
+        <label>Loading...</label>
+    }
+</h1>
+
+<button class="btn btn-primary" style="margin-bottom: 20px;" @onclick="(()=> showWorkoutDialog=true)">
+    Add a new workout session
+</button>
+
+@if(workouts != null)
+{
+
+    <table class="table table-borderless">
+        <thead class="table-dark">
+            <tr >
+                <th>Id</th>
+                <th>Duration</th>
+                <th>Date</th>
+                <th> </th>
+                <th></th>
+            </tr>
+        </thead>
+        <tbody>
+            @foreach (var w in workouts)
+            {
+                <WorkoutLog workout="@w" removeFromList="@removeFromList"></WorkoutLog>
+            }
+        </tbody>
+    </table>
+    
+   
+}
+
+
+@if (showWorkoutDialog)
+{
+    <div class="workout-dialog">
+        <h3 style="margin-bottom: 3%">
+            Enter the details for a new session:
+        </h3>
+        <EditForm Model="Model" OnValidSubmit="Submit" FormName="AddWorkout">
+            <DataAnnotationsValidator />
+            <ValidationSummary />
+            <div class="input-div">
+                <label class="input">
+                    Duration (min):
+                    <InputNumber @bind-Value="Model!.Duration" />
+                </label>
+                <label class="input">
+                    Date:
+                    <InputDate @bind-Value="Model!.Date"> </InputDate>
+
+                </label>
+            </div>
+            <div class="buttons-div">
+                <button class="btn btn-primary" id="cancel-button" @onclick="() => showWorkoutDialog= !showWorkoutDialog"> Cancel</button>
+                <button class="btn btn-primary" id="confirm-button" type="submit"> Confirm</button>
+            </div>
+        </EditForm>
+        
+        
+    </div>
+}
+
+@code {
+    [Parameter]
+    public int Id { set; get; }
+    public List<Workout>? workouts;
+    public User? user;
+    public bool showWorkoutDialog;
+
+    [SupplyParameterFromForm]
+    public Work? Model { get; set; }
+
+    protected override async Task OnInitializedAsync()
+    {
+        Model ??= new() { Date = DateTime.Now};
+        user = await userRepo.GetByIdAsync(Id);
+        Console.WriteLine("The id is" + user.Id);
+        ICollection<Workout> col = user.Workouts;
+        workouts = new List<Workout>(col);
+        foreach(Workout w in workouts)
+        {
+            Console.WriteLine("For workout:" + w.Id);
+            foreach (ExerciseLog e in w.ExerciseLogs)
+                Console.WriteLine("Log: " + e.ExerciseId);
+        }
+    }
+
+
+    private async Task Submit()
+    {
+        Workout w = new Workout()
+            {
+                UserId = Id,
+                Duration = Model?.Duration,
+                Date = Model.Date
+                    ,
+            };
+        try
+        {
+            await workoutRepo.InsertAsync(w);
+            workouts?.Add(w);
+            showWorkoutDialog = false;
+
+        }catch(Exception e)
+        {
+            Console.WriteLine("Could not add workout: "+ e);
+        }
+    }
+    protected void removeFromList(Workout w)
+    {
+        workouts?.Remove(w);
+    }
+
+
+    public class Work
+    {
+        [Required]
+        public int Duration;
+        public DateTime Date;
+    }
+}

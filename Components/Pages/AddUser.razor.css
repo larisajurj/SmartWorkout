@@ -12,10 +12,7 @@
     display:flex;
     border-radius: 30px;
 }
-
-
 .decorative-img {
-   
     height: 800px;
     width: 600px;
 }
@@ -109,3 +106,5 @@
     .submit:active {
         background-color: #06b;
     }
+
+    

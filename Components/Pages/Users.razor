@@ -56,7 +56,7 @@ else
                 <th>Gender</th>
                 <th>Edit</th>
                 <th>Delete</th>
-
+                <th>See workouts</th>
             </tr>
         </thead>
         <tbody>
@@ -72,7 +72,7 @@ else
                     <td>@(!string.IsNullOrEmpty(u.Age.ToString()) ? u.Age : "unknown")</td>
                     <td>@u.Gender.Name</td>
                     <td>
-                        <button class="btn">
+                        <button class="btn" style="color:blue !important;">
                             <a href="@($"/edit/{u.Id}")">
                                 <i class="bi bi-person-fill-up"></i>
                             </a>
@@ -83,6 +83,11 @@ else
                         <button @onclick="@(() => deleteUser(u))" class = "btn">
                             <i class="bi bi-person-fill-dash"></i>
                         </button>
+                     </td>
+                     <td>
+                        <a class="btn btn-primary" stype="" href="@($"/workout/{u.Id}")">
+                                <i class="bi bi-person-fill-up"></i>
+                            </a>
                      </td>
                 </tr>
             }
@@ -128,5 +133,6 @@ else
         users = usersAll.Where(u => u.Trainers.Contains(t)).ToList(); 
 
     }
+
 
 }
